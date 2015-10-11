@@ -17,5 +17,10 @@ TO DO
         this.translate = function (x, y, z) {
 
         }
+
+
+        this.returnElements = function () {
+            return _array;
+        }
     }
 })(window)

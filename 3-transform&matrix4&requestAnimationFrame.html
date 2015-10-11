@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>transform&matrix4&requestAnimationFrame</title>
+    <script id="vertexShader" type="text/vertexShader">
+        attribute vec4 a_Position;
+        uniform mat4 _t;
+        void main() {
+            gl_Position = _t * a_Position;
+            gl_PointSize = 10.0;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        precision mediump float;
+        void main() {
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+    </script>
+</head>
+<body>
+<script src="tools/tools.js"></script>
+<script>
+    var r = initCanvas();
+    var gl = r.gl;
+    var canvas = r.domNode;
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+        var a = gl.getAttribLocation(gl.program, "a_Position");
+
+        var c = gl.getUniformLocation(gl.program, "c_Color");
+
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        var vertexBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+        gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+
+        gl.enableVertexAttribArray(a);
+
+        var vArray = new Float32Array([0,0.5,-0.5,-0.5,0.5,-0.5]);
+        gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
+
+
+        //transform matrix
+
+        /* WebGL matrix 存储是列主序
+
+        */
+
+        //translation
+        var tx = 0.5, ty = 0.5, tz = 0;
+        var m_t = new Float32Array([
+            1.0, 0, 0, 0,
+            0, 1.0, 0, 0,
+            0, 0, 1.0, 0,
+            tx, ty, tz, 1.0
+        ])
+
+        // rotation
+        var angle = 30;
+        angle = angle/180 * Math.PI;
+        var sinA = Math.sin(angle);
+        var cosA = Math.cos(angle);
+        var m_r = new Float32Array([
+            cosA, sinA, 0, 0,
+            -sinA, cosA, 0, 0,
+            0, 0, 1.0, 0,
+            0, 0, 0, 1.0
+        ])
+
+        //scale
+        var sx = 0.9,sy = 0.9,sz = 1;
+
+        var m_s = new Float32Array([
+            sx, 0, 0, 0,
+            0, sy, 0, 0,
+            0, 0, sz, 0,
+            0, 0, 0, 1.0
+        ])
+
+        var m = gl.getUniformLocation(gl.program, "_t");
+
+        var r_speed = 0.1, lastTime = new Date();
+
+        function drawTriangle() {
+            var d = new Date();
+            var angle = (d-lastTime)*r_speed;
+            angle = angle/180 * Math.PI;
+            var sinA = Math.sin(angle);
+            var cosA = Math.cos(angle);
+            var m_r = new Float32Array([
+                cosA, sinA, 0, 0,
+                -sinA, cosA, 0, 0,
+                0, 0, 1.0, 0,
+                0, 0, 0, 1.0
+            ]);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.uniformMatrix4fv(m, false, m_r);
+            gl.drawArrays(gl.TRIANGLES, 0 , 3);
+            requestAnimationFrame(drawTriangle);
+        }
+
+        drawTriangle();
+
+    }
+
+</script>
+</body>
+</html>

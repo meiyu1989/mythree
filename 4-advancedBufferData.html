@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>advanceBufferData</title>
+    <script id="vertexShader" type="text/vertexShader">
+        attribute vec4 a_Position;
+        attribute float a_size;
+        attribute vec4 _color;
+        varying vec4 vector_color;
+        void main() {
+            gl_Position = a_Position;
+            gl_PointSize = a_size;
+            vector_color = _color;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        precision mediump float;
+        varying vec4 vector_color;
+        void main() {
+            gl_FragColor = vector_color;
+        }
+    </script>
+</head>
+<body>
+<button onclick="draw1()">drawTriangle</button>
+<script src="tools/tools.js"></script>
+<script>
+    var r = initCanvas();
+    var gl = r.gl;
+    var canvas = r.domNode;
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+        var a = gl.getAttribLocation(gl.program, "a_Position");
+        var s = gl.getAttribLocation(gl.program, "a_size")
+        var c = gl.getAttribLocation(gl.program, "_color");
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        var vertexBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+
+
+        var vArray = new Float32Array([
+            0,0.5,10,1.0,0.0,0.0,1.0,
+            -0.5,-0.5,20,0.0,1.0,0.0,1.0,
+            0.5,-0.5,30,0.0,0.0,1.0,1.0]);
+
+        var _SIZE = vArray.BYTES_PER_ELEMENT;
+        gl.vertexAttribPointer(a, 2, gl.FLOAT, false, _SIZE*7, 0);
+        gl.vertexAttribPointer(s, 1, gl.FLOAT, false, _SIZE*7, _SIZE*2);
+        gl.vertexAttribPointer(c, 4, gl.FLOAT, false, _SIZE*7, _SIZE*3);
+        gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
+
+        gl.enableVertexAttribArray(a);
+        gl.enableVertexAttribArray(s);
+        gl.enableVertexAttribArray(c);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.POINTS, 0 , 3);
+
+        function draw1() {
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0 , 3);
+        }
+    }
+
+</script>
+</body>
+</html>

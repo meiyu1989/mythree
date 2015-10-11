@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Test Tools.js</title>
+    <script id="vertexShader" type="text/vertexShader">
+        void main() {
+            gl_Position = vec4(0, 0.5, 0.0, 1.0);
+            gl_PointSize = 20.0;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        void main() {
+            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    </script>
+</head>
+<body>
+<script src="tools/tools.js"></script>
+<script>
+    var gl = initCanvas()
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.POINTS, 0 , 1);
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>attribute & uniform</title>
+    <script id="vertexShader" type="text/vertexShader">
+        attribute vec4 a_Position;
+        void main() {
+            gl_Position = a_Position;
+            gl_PointSize = 20.0;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        precision mediump float;
+        uniform vec4 c_Color;
+        void main() {
+            gl_FragColor = c_Color;
+        }
+    </script>
+</head>
+<body>
+<script src="tools/tools.js"></script>
+<script>
+    var r = initCanvas();
+    var gl = r.gl;
+    var canvas = r.domNode;
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+        var a = gl.getAttribLocation(gl.program, "a_Position");
+
+        var c = gl.getUniformLocation(gl.program, "c_Color");
+
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        canvas.onmouseup = function (ev) {
+            var x = ev.layerX;
+            var y = ev.layerY;
+            w = canvas.clientWidth;
+            h = canvas.clientHeight;
+            x1 = (x-w/2)/(w/2);
+            y1 = (y-h/2)/(h/2)*(-1);
+            gl.vertexAttrib3f(a, x1, y1, 0);
+            gl.uniform4f(c, Math.sin(x1), Math.sin(y1), 1, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.POINTS, 0 , 1);
+        }
+        alert("click the canvas to draw a point")
+    }
+
+</script>
+</body>
+</html>

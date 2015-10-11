@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>triangles & bufferData</title>
+    <script id="vertexShader" type="text/vertexShader">
+        attribute vec4 a_Position;
+        void main() {
+            gl_Position = a_Position;
+            gl_PointSize = 10.0;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        precision mediump float;
+        void main() {
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+    </script>
+</head>
+<body>
+<script src="tools/tools.js"></script>
+<script>
+    var r = initCanvas();
+    var gl = r.gl;
+    var canvas = r.domNode;
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+        var a = gl.getAttribLocation(gl.program, "a_Position");
+
+        var c = gl.getUniformLocation(gl.program, "c_Color");
+
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        var n = 0;
+
+        var ja = []
+
+        var vertexBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+        gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+
+        gl.enableVertexAttribArray(a);
+
+        gl.drawArrays(gl.POINTS, 0 , n);
+
+        canvas.onmouseup = function (ev) {
+            var x = ev.layerX;
+            var y = ev.layerY;
+            w = canvas.clientWidth;
+            h = canvas.clientHeight;
+            x1 = (x-w/2)/(w/2);
+            y1 = (y-h/2)/(h/2)*(-1);
+            ja.push(x1);
+            ja.push(y1);
+            n++;
+            var vArray = new Float32Array(ja);
+            gl.bufferData(gl.ARRAY_BUFFER, vArray, gl.STATIC_DRAW);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            var s2 = n%3;
+            var s1 = n-s2;
+            gl.drawArrays(gl.TRIANGLES, 0 , s1);
+            gl.drawArrays(gl.POINTS, s1 , s2);
+        }
+
+    }
+
+</script>
+</body>
+</html>

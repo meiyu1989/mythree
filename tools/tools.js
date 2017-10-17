@@ -4,8 +4,8 @@
 (function(global){
     function initCanvas (p) {
         var p1 = {
-            w: 600,
-            h: 400,
+            w: 360,
+            h: 360,
             domNode: document.body
         }
 

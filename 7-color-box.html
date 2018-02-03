@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>3D Cube</title>
+    <script id="vertexShader" type="text/vertexShader">
+        uniform mat4 u_MvpMatrix;
+        attribute vec4 a_Position;
+        attribute vec4 a_Color;
+        varying vec4 vColor;
+        void main() {
+            gl_Position = u_MvpMatrix * a_Position;
+            vColor = a_Color;
+        }
+    </script>
+
+    <script id="fragmentShader" type="text/fragmentShader">
+        precision mediump float;
+        varying vec4 vColor;
+        void main() {
+            gl_FragColor = vColor;
+        }
+    </script>
+</head>
+<body>
+<script src="tools/k-matrix.js"></script>
+<script src="tools/tools.js"></script>
+<script>
+    var r = initCanvas({
+        w: 360,
+        h: 360
+    });
+    var gl = r.gl;
+    var canvas = r.domNode;
+    if(gl) {
+        initShaderFromStr(gl, document.getElementById("vertexShader").textContent, document.getElementById("fragmentShader").textContent);
+
+        //设置顶点和颜色信息
+        var verticesAndColors = new Float32Array([
+            1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1,
+            1, 1, 1, 0, 1, 1, -1, 1, 1, 0, 1, 1, -1, 1, -1, 0, 1, 1, 1, 1, -1, 0, 1, 1,
+            1, -1, 1, 0, .5, 0, -1, -1, 1, 0, .5, 0, -1, -1, -1, 0, .5, 0, 1, -1, -1, 0, .5, 0,
+            1, 1, -1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, -1, 1, 0, 0, 1, 1, -1, -1, 0, 0, 1,
+        ])
+
+        var verticesAndColorsBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, verticesAndColorsBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, verticesAndColors, gl.STATIC_DRAW);
+
+        var FSIZE = verticesAndColors.BYTES_PER_ELEMENT;
+        var aPosition = gl.getAttribLocation(gl.program, 'a_Position');
+        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, FSIZE * 6, 0);
+        gl.enableVertexAttribArray(aPosition);
+
+        var aColor = gl.getAttribLocation(gl.program, 'a_Color');
+        gl.vertexAttribPointer(aColor, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+        gl.enableVertexAttribArray(aColor);
+
+        //面索引
+        var indices = new Uint8Array([
+            0, 1, 2, 0, 2, 3,
+            7, 6, 5, 7, 5, 4,
+            8, 9, 10, 8, 10, 11,
+            12, 13, 14, 12, 14, 15
+        ])
+        var indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+        var N = indices.length;
+
+        gl.clearColor(0. , 0., 0., 1.);
+        gl.enable(gl.DEPTH_TEST);
+
+        var mvpMatrix = new Matrix4();
+        mvpMatrix.setPerspective(30, 1, 1, 100);
+        mvpMatrix.lookAt(3,3,7,0,0,0,0,1,0);
+
+        var uM = gl.getUniformLocation(gl.program, 'u_MvpMatrix')
+        gl.uniformMatrix4fv(uM, false, mvpMatrix.elements);
+
+        var S = 10
+        function draw () {
+            mvpMatrix.rotate(S * 0.1, 0, 1, 0);
+            gl.uniformMatrix4fv(uM, false, mvpMatrix.elements);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.drawElements(gl.TRIANGLES, N, gl.UNSIGNED_BYTE, 0);
+            requestAnimationFrame(draw)
+        }
+
+        draw();
+
+    }
+
+</script>
+</body>
+</html>
